@@ -1,19 +1,6 @@
 #--------------------------------------------
 # SQLite build script for amalgamation
-#
-# default folder structure as follows
-# <project root folder>
-#      src/
-#
 #--------------------------------------------
-cmake_minimum_required(VERSION 3.9 FATAL_ERROR)
-
-set(PROJECT_NAME sqlite)
-
-# define project for C language
-project(${PROJECT_NAME} C)
-
-message("Building on: ${CMAKE_SYSTEM_NAME}")
 
 option(SQLITE_BUILD_STATIC  "Build SQLite static library" ON)
 option(SQLITE_BUILD_SHARED  "Build SQLite shared library" ON)
@@ -38,7 +25,7 @@ endif()
 # ---------------------
 # Version detection
 # ---------------------
-file(STRINGS "${PROJECT_SOURCE_DIR}/src/sqlite3.h" _sqlite_api_h_VER_STRING REGEX ".*#define[ ]+SQLITE_VERSION[ ]+")
+file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/sqlite3.h" _sqlite_api_h_VER_STRING REGEX ".*#define[ ]+SQLITE_VERSION[ ]+")
 
 string(REGEX MATCH "[0-9\\.]+" SQLITE_VER_STRING ${_sqlite_api_h_VER_STRING})
 string(REGEX MATCHALL "[0-9]+" _sqlite_ver_LIST "${SQLITE_VER_STRING}")
@@ -53,17 +40,18 @@ endif()
 
 message("FOUND: SQLite version = ${SQLITE_VER_STRING}")
 
-set(SQLITE_DYN_NAME "${PROJECT_NAME}${SQLITE_VER_MAJOR}")
-set(SQLITE_STATIC_NAME "${SQLITE_DYN_NAME}-static")
+# Use CACHE INTERNAL "" to make the variables available in other directories
+set(SQLITE_DYN_NAME "${SQLITE_NAME}${SQLITE_VER_MAJOR}" CACHE INTERNAL "")
+set(SQLITE_STATIC_NAME "${SQLITE_DYN_NAME}-static" CACHE INTERNAL "")
 
 find_package(Threads REQUIRED)
 
 # add include path for project
-include_directories(${PROJECT_SOURCE_DIR}/src)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
-set(SRC_LIB_FILE ${PROJECT_SOURCE_DIR}/src/sqlite${SQLITE_VER_MAJOR}.c)
-set(SRC_SHELL_FILE ${PROJECT_SOURCE_DIR}/src/shell.c)
-file(GLOB HDR_FILES ${PROJECT_SOURCE_DIR}/src/*.h)
+set(SRC_LIB_FILE ${CMAKE_CURRENT_SOURCE_DIR}/sqlite${SQLITE_VER_MAJOR}.c)
+set(SRC_SHELL_FILE ${CMAKE_CURRENT_SOURCE_DIR}/shell.c)
+file(GLOB HDR_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
 
 # adding compilation flags depending on options
 if(WITH_SQLITE_DEBUG)
@@ -93,6 +81,7 @@ if (SQLITE_BUILD_SHARED)
         #then we do dll library, so need to export api
         set_target_properties(${SQLITE_DYN_NAME} PROPERTIES DEFINE_SYMBOL "SQLITE_API=__declspec(dllexport)")
     endif()
+    target_include_directories(${SQLITE_DYN_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 endif()
 
 # build shell executable
