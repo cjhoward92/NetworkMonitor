@@ -2,6 +2,8 @@
 
 ## Building
 
+Currently, this project requires `cmake >= v3.9.x`
+
 `mkdir build`  
 `cd build`  
 `cmake ..`  
