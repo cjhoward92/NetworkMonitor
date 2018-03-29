@@ -2,7 +2,7 @@
 
 static int t_count = 0;
 
-void nm_free_thread(nm_thread_ctx *ctx) {
+void nm_thread_free(nm_thread_ctx *ctx) {
   if (ctx->t_handle)
     CloseHandle(ctx->t_handle);
 
@@ -13,7 +13,7 @@ void nm_free_thread(nm_thread_ctx *ctx) {
   t_count--;
 }
 
-nm_thread_ctx * nm_create_thread(LPTHREAD_START_ROUTINE fn, void *param) {
+nm_thread_ctx * nm_thread_create(LPTHREAD_START_ROUTINE fn, void *param) {
   if (t_count == MAX_THREADS) {
     return NULL;
   }
@@ -27,14 +27,17 @@ nm_thread_ctx * nm_create_thread(LPTHREAD_START_ROUTINE fn, void *param) {
     fn,
     ctx->data,
     0,
-    ctx->t_id
+    &ctx->t_id
   );
 
+  printf("Post thread spawn\n");
   if (!ctx->t_handle) {
-    nm_free_thread(ctx);
+    printf("We don't have a handle on things\n");
+    nm_thread_free(ctx);
     return NULL;
   }
 
+  printf("increment t_count\n");
   t_count++;
   return ctx;
 }

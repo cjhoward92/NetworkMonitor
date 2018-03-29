@@ -5,6 +5,7 @@
 #include "win32/threading.h"
 #endif
 
+//TODO: Cleanup so not windows dependent
 static DWORD WINAPI spawn_thread(LPVOID param) {
   printf("We spawned a thread\n");
   return 0;
@@ -36,8 +37,12 @@ int main(int argc, char *argv[]) {
   return error;
 #endif
 #ifndef DB_TEST
-  nm_thread_ctx *ctx = nm_create_thread(spawn_thread, NULL);
+  nm_thread_ctx *ctx = nm_thread_create(spawn_thread, NULL);
+  printf("created thread\n");
   nm_thread_join(ctx);
+  printf("waited on thread\n");
+  nm_thread_free(ctx);
+  printf("freed thread\n");
   return 0;
 #endif
 }
