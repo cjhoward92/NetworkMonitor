@@ -8,10 +8,6 @@ option(WITH_SQLITE_DEBUG    "Build SQLite debug features" OFF)
 option(WITH_SQLITE_MEMDEBUG "Build SQLite memory debug features" OFF)
 option(WITH_SQLITE_RTREE    "Build R*Tree index extension" OFF)
 
-set(INSTALL_BIN_DIR "${CMAKE_INSTALL_PREFIX}/bin" CACHE PATH "Installation directory for executables")
-set(INSTALL_LIB_DIR "${CMAKE_INSTALL_PREFIX}/lib" CACHE PATH "Installation directory for libraries")
-set(INSTALL_INC_DIR "${CMAKE_INSTALL_PREFIX}/include" CACHE PATH "Installation directory for headers")
-
 set(SQLITE_WIN_BUILD OFF)
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     set(SQLITE_WIN_BUILD ON)
@@ -97,18 +93,4 @@ else()
     message(FATAL_ERROR "either static or dynamic option should be selected")
 endif()
 
-# installation
-list(APPEND TO_INSTALL shell)
-if(SQLITE_BUILD_SHARED)
-    list(APPEND TO_INSTALL ${SQLITE_DYN_NAME})
-endif()
-if(SQLITE_BUILD_STATIC)
-    list(APPEND TO_INSTALL ${SQLITE_STATIC_NAME})
-endif()
-
-install(TARGETS ${TO_INSTALL}
-        RUNTIME DESTINATION "${INSTALL_BIN_DIR}"
-        ARCHIVE DESTINATION "${INSTALL_LIB_DIR}"
-        LIBRARY DESTINATION "${INSTALL_LIB_DIR}" )
-install(FILES ${HDR_FILES} DESTINATION "${INSTALL_INC_DIR}")
-
+set(SQLITE_OUT_DIR $<TARGET_FILE_DIR:${SQLITE_DYN_NAME}> CACHE INTERNAL "")
