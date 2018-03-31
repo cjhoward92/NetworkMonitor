@@ -4,3 +4,5 @@ bin
 .DS_STORE
 sqlite/build
 .vscode
+config.json
+*/**/config.json
