@@ -47,7 +47,11 @@ int main(int argc, char *argv[]) {
   // printf("freed thread\n");
   // return 0;
 
-  const char *config_path = "../config.json";
+  const char cur_dir[1024];
+  GetCurrentDirectory(1024, cur_dir);
+  printf("%s\n", cur_dir);
+
+  const char *config_path = "build\\src\\Debug\\config.json";
   nm_config *cfg;
   int error = nm_config_load(&cfg, config_path);
   if (error) {

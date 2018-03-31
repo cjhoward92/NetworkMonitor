@@ -27,5 +27,4 @@ endif(CMAKE_COMPILER_IS_GNUCXX)
 # SET( CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} ${GCC_COVERAGE_LINK_FLAGS}" )
 
 add_subdirectory(sqlite)
-# add_subdirectory(cJSON)
 add_subdirectory(src)
