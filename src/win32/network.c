@@ -1,5 +1,6 @@
 #include "network.h"
 
+// This tut: https://msdn.microsoft.com/en-us/library/windows/desktop/ms739167(v=vs.85).aspx
 
 // Windows only
 static int init_wsa(WSADATA **out) {
