@@ -1,6 +1,8 @@
 #ifndef __NETWORK_H__
 #define __NETWORK_H__
 
+#define VC_EXTRALEAN
+#define WIN32_LEAN_AND_MEAN
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <iphlpapi.h>
@@ -11,7 +13,8 @@
 #pragma comment(lib, "Ws2_32.lib")
 
 #define DEFAULT_SERVER_PORT "36000"
+#define REC_BUF_SIZE 1024
 
-typedef addrinfo addrinfo;
+int nm_network_startserver(void);
 
 #endif

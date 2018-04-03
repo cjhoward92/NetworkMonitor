@@ -3,7 +3,7 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 endif()
 
 # this needs to be crafted to work on all os
-add_executable(${PROJECT_NAME} main.c win32/threading.c config.c utils.c cJSON.c)
+add_executable(${PROJECT_NAME} main.c win32/threading.c win32/network.c config.c utils.c cJSON.c)
 
 # add sqlite as a library
 target_link_libraries (${PROJECT_NAME} LINK_PUBLIC ${SQLITE_DYN_NAME})

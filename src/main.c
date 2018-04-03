@@ -3,6 +3,7 @@
 
 #ifdef WIN32
 #include "win32/threading.h"
+#include "win32/network.h"
 #endif
 
 #include "config.h"
@@ -47,16 +48,19 @@ int main(int argc, char *argv[]) {
   // printf("freed thread\n");
   // return 0;
 
-  char cur_dir[1024];
-  GetCurrentDirectory(1024, cur_dir);
-  printf("%s\n", cur_dir);
+  // char cur_dir[1024];
+  // GetCurrentDirectory(1024, cur_dir);
+  // printf("%s\n", cur_dir);
 
-  const char *config_path = "config.json";
-  nm_config *cfg;
-  int error = nm_config_load(&cfg, config_path);
-  if (error) {
-    fprintf(stderr, "Could not get config. Error: %d\n", error);
-  }
+  // const char *config_path = "config.json";
+  // nm_config *cfg;
+  // int error = nm_config_load(&cfg, config_path);
+  // if (error) {
+  //   fprintf(stderr, "Could not get config. Error: %d\n", error);
+  // }
 
+  // return error;
+
+  int error = nm_network_startserver();
   return error;
 }

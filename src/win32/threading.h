@@ -1,5 +1,11 @@
 #ifndef __THREADING_H__
 #define __THREADING_H__
+
+// Just leave these dumbass values in here... fucking windows, man.
+// https://stackoverflow.com/questions/5971332/redefinition-errors-in-winsock2-h?lq=1
+// https://developercommunity.visualstudio.com/content/problem/96399/with-153-update-c-projects-generate-type-redefinit.html
+#define VC_EXTRALEAN
+#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <stdlib.h>
 #include <stdio.h>
