@@ -126,27 +126,24 @@ static SOCKET client_init(void) {
     return error;
   }
 
-  SOCKET sock = INVALID_SOCKET;
-  sock = socket(ptr->ai_family, ptr->ai_socktype, ptr->ai_protocol);
-  if (sock == INVALID_SOCKET) {
-    printf("Error at socket(): %d\n", WSAGetLastError());
-    freeaddrinfo(result);
-    WSACleanup();
-    return 1;
-  }
-
   // Use all of the addresses returned from getaddrinfo to try and connect
   ptr = result;
+  SOCKET sock = INVALID_SOCKET;
   while (ptr) {
+    sock = socket(ptr->ai_family, ptr->ai_socktype, ptr->ai_protocol);
+    if (sock == INVALID_SOCKET) {
+      ptr = ptr->ai_next;
+      continue;
+    }
+
     error = connect(sock, ptr->ai_addr, (int)ptr->ai_addrlen);
     if (error == SOCKET_ERROR) {
       closesocket(sock);
       sock = INVALID_SOCKET;
-      break;
-    } else if (!error) {
-      break;
+      ptr = ptr->ai_next;  
+      continue;
     }
-    ptr = ptr->ai_next;
+    break;
   }
 
   freeaddrinfo(result);
