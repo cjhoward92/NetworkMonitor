@@ -11,8 +11,7 @@ static int sock_init(SOCKET **out) {
 
   struct addrinfo *res = NULL, hints;
 
-  // memset on windows, I guess
-  ZeroMemory(&hints, sizeof(hints));
+  memset(&hints, 0, sizeof(hints));
   hints.ai_family = AF_INET;
   hints.ai_socktype = SOCK_STREAM;
   hints.ai_protocol = IPPROTO_TCP;
@@ -67,6 +66,8 @@ static int sock_receive(SOCKET client) {
   int result = 0, sendres = 0;
   int buflen = REC_BUF_SIZE;
 
+  memset(rec_buf, 0, REC_BUF_SIZE);
+
   do {
     result = recv(client, rec_buf, buflen, 0);
     if (result > 0) {
@@ -108,4 +109,87 @@ cleanup:
   WSACleanup();
 
   return error;
+}
+
+static SOCKET client_init(void) {
+  struct addrinfo *result = NULL, *ptr = NULL, hints;
+
+  memset(&hints, 0, sizeof(hints));
+  hints.ai_family = AF_UNSPEC;
+  hints.ai_socktype = SOCK_STREAM;
+  hints.ai_protocol = IPPROTO_TCP;
+
+  // localhost should be replaced with the server name
+  int error = getaddrinfo("127.0.0.1", DEFAULT_SERVER_PORT, &hints, &result);
+  if (error) {
+    WSACleanup();
+    return error;
+  }
+
+  SOCKET sock = INVALID_SOCKET;
+  sock = socket(ptr->ai_family, ptr->ai_socktype, ptr->ai_protocol);
+  if (sock == INVALID_SOCKET) {
+    printf("Error at socket(): %d\n", WSAGetLastError());
+    freeaddrinfo(result);
+    WSACleanup();
+    return 1;
+  }
+
+  // Use all of the addresses returned from getaddrinfo to try and connect
+  ptr = result;
+  while (ptr) {
+    error = connect(sock, ptr->ai_addr, (int)ptr->ai_addrlen);
+    if (error == SOCKET_ERROR) {
+      closesocket(sock);
+      sock = INVALID_SOCKET;
+      break;
+    } else if (!error) {
+      break;
+    }
+    ptr = ptr->ai_next;
+  }
+
+  freeaddrinfo(result);
+  
+  if (sock == INVALID_SOCKET) {
+    printf("Unable to connect to server!\n");
+    WSACleanup();
+    return error;
+  }
+
+  return sock;
+}
+
+int nm_network_createclient(void) {
+  SOCKET sock = client_init();
+  if (sock == INVALID_SOCKET)
+    return 1;
+
+  int rec_buflen = REC_BUF_SIZE;
+  char *send_buf = "Hello darkness my old friend";
+  char rec_buf[REC_BUF_SIZE];
+  memset(rec_buf, 0, rec_buflen);
+
+  int result = send(sock, send_buf, (int)strlen(send_buf), 0);
+  if (result == SOCKET_ERROR)
+    goto cleanup;
+
+  printf("Sent %d bytes\n", result);
+
+  result = shutdown(sock, SD_SEND);
+  if (result == SOCKET_ERROR)
+    goto cleanup;
+
+  do {
+    result = recv(sock, rec_buf, rec_buflen, 0);
+    if (result > 0)
+      printf("Recieved %s\n", rec_buf);
+    else if (result < 0)
+      printf("recv failed: %d\n", WSAGetLastError());
+  } while (result > 0);
+
+cleanup:
+  closesocket(sock);
+  WSACleanup();
+  return 0;
 }
