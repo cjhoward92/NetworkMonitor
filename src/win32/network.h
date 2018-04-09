@@ -8,6 +8,7 @@
 #include <iphlpapi.h>
 #include <windows.h>
 #include <stdio.h>
+#include <time.h>
 
 // https://www.binarytides.com/winsock-socket-programming-tutorial/
 #pragma comment(lib, "Ws2_32.lib")
@@ -15,6 +16,6 @@
 #define DEFAULT_SERVER_PORT "36000"
 #define REC_BUF_SIZE 1024
 
-int nm_network_startserver(void);
+int nm_network_startstream(void);
 
 #endif

@@ -1,13 +1,11 @@
 #include "network.h"
 
 // This tut: https://msdn.microsoft.com/en-us/library/windows/desktop/ms739167(v=vs.85).aspx
-
-static int sock_init(SOCKET **out) {
+static SOCKET stream_init(void) {
   int error = 0;
   WSADATA data;
-  if ((error = WSAStartup(MAKEWORD(2, 2), &data)) != 0) {
-    return error;
-  }
+  if ((error = WSAStartup(MAKEWORD(2, 2), &data)) != 0)
+    return INVALID_SOCKET;
 
   struct addrinfo *res = NULL, hints;
 
@@ -18,15 +16,14 @@ static int sock_init(SOCKET **out) {
   hints.ai_flags = AI_PASSIVE;
 
   error = getaddrinfo(NULL, DEFAULT_SERVER_PORT, &hints, &res);
-  if (error) {
-    return error;
-  }
+  if (error)
+    return INVALID_SOCKET;
 
   SOCKET sock = INVALID_SOCKET;
   sock = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
   if (sock == INVALID_SOCKET) {
     printf("socket failed: %d\n", WSAGetLastError());
-    return 1; //TODO: some error here
+    return INVALID_SOCKET;
   }
 
   error = bind(sock, res->ai_addr, (int)res->ai_addrlen);
@@ -35,46 +32,42 @@ static int sock_init(SOCKET **out) {
 
   if (error) {
     printf("bind failed: %d\n", WSAGetLastError());
-    return error;
+    return INVALID_SOCKET;
   }
 
-  *out = &sock;
-
-  return error;
+  return sock;
 }
 
-static int sock_listen_accept(SOCKET **out, SOCKET sock) {
-  *out = NULL;
+static SOCKET stream_init_client(SOCKET sock) {
   if (listen(sock, SOMAXCONN) == SOCKET_ERROR) {
     printf("listen failed: %d\n", WSAGetLastError());
-    return 1;
+    return INVALID_SOCKET;
   }
 
   SOCKET client = INVALID_SOCKET;
   client = accept(sock, NULL, NULL);
   if (client == INVALID_SOCKET) {
     printf("accept failed: %d\n", WSAGetLastError());
-    return 1;
+    return INVALID_SOCKET;
   }
 
-  *out = &client;
-  return 0;
+  return client;
 }
 
-static int sock_receive(SOCKET client) {
+static int stream_receive(SOCKET client) {
   char rec_buf[REC_BUF_SIZE];
-  int result = 0, sendres = 0;
-  int buflen = REC_BUF_SIZE;
+  int result = 0, send_res = 0;
+  int buf_len = REC_BUF_SIZE;
 
   memset(rec_buf, 0, REC_BUF_SIZE);
 
   do {
-    result = recv(client, rec_buf, buflen, 0);
+    result = recv(client, rec_buf, buf_len, 0);
     if (result > 0) {
       printf("Data received: %s\n", rec_buf);
 
-      sendres = send(client, rec_buf, result, 0);
-      if (sendres == SOCKET_ERROR) {
+      send_res = send(client, rec_buf, result, 0);
+      if (send_res == SOCKET_ERROR) {
         return 1;
       }
     } else if (result < 0)  {
@@ -85,26 +78,24 @@ static int sock_receive(SOCKET client) {
   return 0;
 }
 
-int nm_network_startserver(void) {
-  SOCKET *server = NULL;
-  SOCKET *client = NULL;
+int nm_network_start_server(void) {
   int error = 0;
 
-  if ((error = sock_init(&server)) != 0) {
+  SOCKET server = stream_init();
+  if (server == INVALID_SOCKET)
     goto cleanup;
-  }
 
-  if ((error = sock_listen_accept(&client, (*server))) != 0) {
+  SOCKET client = stream_init_client(server);
+  if (client == INVALID_SOCKET)
     goto cleanup;
-  }
 
-  error = sock_receive((*client));
+  error = stream_receive(client);
 
 cleanup:
-  if (server)
-    closesocket(*server);
-  if (client)
-    closesocket(*client);
+  if (server != INVALID_SOCKET)
+    closesocket(server);
+  if (client != INVALID_SOCKET)
+    closesocket(client);
 
   WSACleanup();
 
@@ -113,7 +104,7 @@ cleanup:
 
 static SOCKET client_init(void) {
   struct addrinfo *result = NULL, *ptr = NULL, hints;
-
+  
   memset(&hints, 0, sizeof(hints));
   hints.ai_family = AF_UNSPEC;
   hints.ai_socktype = SOCK_STREAM;
@@ -162,10 +153,10 @@ int nm_network_createclient(void) {
   if (sock == INVALID_SOCKET)
     return 1;
 
-  int rec_buflen = REC_BUF_SIZE;
+  int rec_buf_len = REC_BUF_SIZE;
   char *send_buf = "Hello darkness my old friend";
   char rec_buf[REC_BUF_SIZE];
-  memset(rec_buf, 0, rec_buflen);
+  memset(rec_buf, 0, rec_buf_len);
 
   int result = send(sock, send_buf, (int)strlen(send_buf), 0);
   if (result == SOCKET_ERROR)
@@ -178,7 +169,7 @@ int nm_network_createclient(void) {
     goto cleanup;
 
   do {
-    result = recv(sock, rec_buf, rec_buflen, 0);
+    result = recv(sock, rec_buf, rec_buf_len, 0);
     if (result > 0)
       printf("Recieved %s\n", rec_buf);
     else if (result < 0)
