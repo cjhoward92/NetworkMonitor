@@ -5,6 +5,9 @@
 #include "win32/threading.h"
 #include "win32/network.h"
 #endif
+#ifdef LINUX
+#include "posix/threading.h"
+#endif
 
 #include "config.h"
 

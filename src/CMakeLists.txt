@@ -1,6 +1,9 @@
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     add_definitions(-DWIN23)
 endif()
+if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+    add_definitions(-DLINUX)
+endif()
 
 # this needs to be crafted to work on all os
 add_executable(${PROJECT_NAME} main.c win32/threading.c win32/network.c config.c utils.c cJSON.c)
