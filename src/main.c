@@ -26,6 +26,9 @@ int main(int argc, char *argv[]) {
 #ifdef WIN32
   printf("This is a windows build\n");
 #endif
+#ifdef LINUX
+  printf("This is a linux build\n");
+#endif
 
   // Testing DB
   // int error;

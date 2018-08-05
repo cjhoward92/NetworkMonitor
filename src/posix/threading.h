@@ -5,7 +5,6 @@
 
 #define MAX_THREADS 3
 
-// https://msdn.microsoft.com/en-us/library/windows/desktop/ms682516(v=vs.85).aspx
 typedef struct nm_thread_ctx {
   pthread_t t_handle;
   pthread_t t_id;
