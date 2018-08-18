@@ -3,7 +3,12 @@
 
 static FILE * open_config_file(const char *path, const char *mode) {
   FILE *fd;
+#ifdef WIN32
   fopen_s(&fd, path, mode);
+#endif
+#ifdef LINUX
+  fd = fopen(path, mode);
+#endif
   return fd;
 }
 

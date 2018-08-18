@@ -2,6 +2,7 @@
 #define __THREADING_H__
 
 #include <pthread.h>
+#include <stdlib.h>
 
 #define MAX_THREADS 3
 

@@ -7,6 +7,7 @@
 #endif
 #ifdef LINUX
 #include "posix/threading.h"
+#include "posix/network.h"
 #endif
 
 #include "config.h"
